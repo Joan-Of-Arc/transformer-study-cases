@@ -1,6 +1,6 @@
 import numpy as np 
-from torch.autograd import Variable
-from pyitcast.transformer_utils import Batch, get_std_opt, LabelSmoothing, SimpleLossCompute, run_epoch, greedy_decode
+# from torch.autograd import Variable
+# from pyitcast.transformer_utils import Batch, get_std_opt, LabelSmoothing, SimpleLossCompute, run_epoch, greedy_decode
 
 def dist(A, B):
     """计算 A B 矩阵行向量之间的欧式距离"""
@@ -54,6 +54,9 @@ if __name__ == "__main__":
     for i in range(10):
         tgt_sig[i::20] = 1
     re_num = 100
-    res = data_gen(detectors, tgt_sig, re_num)
-    for r in res:
-        print(r)
+    res = data_gen(detectors, tgt_sig, re_num, batch_size = 5, batch_num = 15)
+    
+    for i, r in enumerate(res):
+        if i == 3: print(r)
+        print(r[0].shape, r[1].shape)
+    print(i)
