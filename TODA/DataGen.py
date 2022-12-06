@@ -1,6 +1,10 @@
 import numpy as np 
+import torch
 # from torch.autograd import Variable
 # from pyitcast.transformer_utils import Batch, get_std_opt, LabelSmoothing, SimpleLossCompute, run_epoch, greedy_decode
+
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 def dist(A, B):
     """计算 A B 矩阵行向量之间的欧式距离"""
@@ -40,8 +44,8 @@ def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10):
                 data = np.vstack((data, np.concatenate(tuple((tgt_sig[s[j]: s[j] + re_num]\
                     * decay[i][j] for j in range(len(s)))), 0)))
         
-        tgt = np.array(tgt * 1000, dtype = "int")
-        data = np.array(data * 1000, dtype = "int")  # 放大 1000 倍至整数区间，方便embd
+        tgt = torch.from_numpy(np.array(tgt * 1000, dtype = "int64"))
+        data = torch.from_numpy(np.array(data * 1000, dtype = "int64"))  # 放大 1000 倍至整数区间，方便embd
 
         # yield Batch(data, tgt)
         yield (data, tgt)
@@ -57,6 +61,8 @@ if __name__ == "__main__":
     res = data_gen(detectors, tgt_sig, re_num, batch_size = 5, batch_num = 15)
     
     for i, r in enumerate(res):
-        if i == 3: print(r)
+        if i == 3: 
+            print(r[0], "\n", r[1])
+            print(r[0].shape, "\n", r[1].shape)
         print(r[0].shape, r[1].shape)
     print(i)
