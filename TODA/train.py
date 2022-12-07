@@ -7,16 +7,22 @@ from DataGen import data_gen
 import time
 
 V = 1100
-lr = 5.0
 model = make_model(V, V, N=6)
-criterion = torch.nn.CrossEntropyLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr = lr)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1.0, gamma = 0.95)
+model_optimizer = get_std_opt(model)
+criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
+loss = SimpleLossCompute(model.generator, criterion, model_optimizer)
 
 detectors = np.array([[1, 0, 1], [0, 1, 1], [1, 1, 1]])
 tgt_sig = np.zeros(400)
 for i in range(10):
     tgt_sig[i::20] = 1
 re_num = 100
+
+def train(batch_size, batch_num):
+    model.train()
+    run_epoch(
+        data_gen(detectors, tgt_sig, re_num, batch_size, batch_num),
+        model,
+        loss )
 
     

@@ -9,7 +9,7 @@ from Model import make_model
 from DataGen import data_gen
 
 V = 1100
-model = make_model(V, V, N=6)
+model = make_model(V, V, N=6, d_model = 1024, d_ff = 2048, head = 16, dropout = 0.3)
 model_optimizer = get_std_opt(model)
 criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
 loss = SimpleLossCompute(model.generator, criterion, model_optimizer)
@@ -21,10 +21,10 @@ for i in range(10):
     tgt_sig[i::20] = 1
 re_num = 100
 
-def run(model, loss, epochs = 10):
+def run(model, loss, epochs = 20):
     for _ in range(epochs):
         model.train()
-        run_epoch(data_gen(detectors, tgt_sig, re_num, 8, 20), model, loss)
+        run_epoch(data_gen(detectors, tgt_sig, re_num, 64, 20), model, loss)
 
         model.eval()
         run_epoch(data_gen(detectors, tgt_sig, re_num, 8, 5), model, loss)
