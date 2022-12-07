@@ -18,13 +18,14 @@ def dist(A, B):
                    - 2 * np.matmul(A, np.transpose(B)))
     return dist
 
-def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10):
+def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10, to_batch = True):
     """
     detectors: 接收器坐标
     tgt_sig: 目标发射的信号
     re_num: 接收器接收的信号点数
     batch_size: 一个batch有多少条数据
     batch_num: 多少个batch
+    to_batch: 是否返回batch类型
     """
     for _ in range(batch_num):
         xy = np.random.random((batch_size, 2))  # 随机生成 x, y
@@ -44,6 +45,7 @@ def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10):
                 data = np.vstack((data, np.concatenate(tuple((tgt_sig[s[j]: s[j] + re_num]\
                     * decay[i][j] for j in range(len(s)))), 0)))
         
+        if data.shape[0] != batch_size: data = np.array([data])
         data[:, 0] = 0  # 起始位
         # 放大 1000 倍至整数区间，方便embd
         tgt = Variable(
@@ -55,8 +57,8 @@ def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10):
             requires_grad = False
             )  
         
-        yield Batch(data, tgt)
-        # yield (data, tgt)
+        if to_batch: yield Batch(data, tgt)
+        else: yield (data, tgt)
 
 
 
@@ -66,7 +68,7 @@ if __name__ == "__main__":
     for i in range(10):
         tgt_sig[i::20] = 1
     re_num = 100
-    res = data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 15)
+    res = data_gen(detectors, tgt_sig, re_num, batch_size = 1, batch_num = 1)
     
     # for i, r in enumerate(res):
     #     if i == 3: 

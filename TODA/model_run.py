@@ -8,7 +8,7 @@ from pyitcast.transformer_utils import Batch, get_std_opt, LabelSmoothing, Simpl
 from Model import make_model
 from DataGen import data_gen
 
-V = 1000
+V = 1100
 model = make_model(V, V, N=6)
 model_optimizer = get_std_opt(model)
 criterion = LabelSmoothing(size=V, padding_idx=0, smoothing=0.0)
@@ -27,14 +27,16 @@ def run(model, loss, epochs = 10):
         run_epoch(data_gen(detectors, tgt_sig, re_num, 8, 20), model, loss)
 
         model.eval()
-        run_epoch(data_gen(detectors, tgt_sig, re_num, 8, 50), model, loss)
+        run_epoch(data_gen(detectors, tgt_sig, re_num, 8, 5), model, loss)
 
     model.eval()
-    d = data_gen(detectors, tgt_sig, re_num, 1, 1)
-    src, trg = Variable(d.src), Variable(d.trg)
+    data = data_gen(detectors, tgt_sig, re_num, 1, 1)
+    for d in data:
+        src, trg = Variable(d.src), Variable(d.trg)
     src_mask = Variable(torch.ones(1, 1, src.shape[-1]))
     res = greedy_decode(model, src, src_mask, max_len = 3, start_symbol=0)
 
+    print(trg, res)
     return (trg, res)
 
 run(model, loss)
