@@ -34,7 +34,7 @@ def run(model, loss, epochs = 20):
     for d in data:
         src, trg = Variable(d.src), Variable(d.trg)
     src_mask = Variable(torch.ones(1, 1, src.shape[-1]))
-    res = greedy_decode(model, src, src_mask, max_len = 3, start_symbol=0)
+    res = greedy_decode(model, src, src_mask, max_len = 4, start_symbol=0)
 
     print(trg, res)
     return (trg, res)
