@@ -1,7 +1,7 @@
 import numpy as np 
 import torch
-# from torch.autograd import Variable
-# from pyitcast.transformer_utils import Batch, get_std_opt, LabelSmoothing, SimpleLossCompute, run_epoch, greedy_decode
+from torch.autograd import Variable
+from pyitcast.transformer_utils import Batch
 
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -44,11 +44,19 @@ def data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 10):
                 data = np.vstack((data, np.concatenate(tuple((tgt_sig[s[j]: s[j] + re_num]\
                     * decay[i][j] for j in range(len(s)))), 0)))
         
-        tgt = torch.from_numpy(np.array(tgt * 1000, dtype = "int64"))
-        data = torch.from_numpy(np.array(data * 1000, dtype = "int64"))  # 放大 1000 倍至整数区间，方便embd
-
-        # yield Batch(data, tgt)
-        yield (data, tgt)
+        data[:, 0] = 0  # 起始位
+        # 放大 1000 倍至整数区间，方便embd
+        tgt = Variable(
+            torch.from_numpy(np.array(tgt * 1000, dtype = "int64")), 
+            requires_grad = False
+            )
+        data = Variable(
+            torch.from_numpy(np.array(data * 1000, dtype = "int64")), 
+            requires_grad = False
+            )  
+        
+        yield Batch(data, tgt)
+        # yield (data, tgt)
 
 
 
@@ -58,11 +66,17 @@ if __name__ == "__main__":
     for i in range(10):
         tgt_sig[i::20] = 1
     re_num = 100
-    res = data_gen(detectors, tgt_sig, re_num, batch_size = 5, batch_num = 15)
+    res = data_gen(detectors, tgt_sig, re_num, batch_size = 8, batch_num = 15)
     
-    for i, r in enumerate(res):
-        if i == 3: 
-            print(r[0], "\n", r[1])
-            print(r[0].shape, "\n", r[1].shape)
-        print(r[0].shape, r[1].shape)
-    print(i)
+    # for i, r in enumerate(res):
+    #     if i == 3: 
+    #         print(r[0], "\n", r[1])
+    #         print(r[0].shape, "\n", r[1].shape)
+    #     print(r[0].shape, r[1].shape)
+    # print(i)
+
+    for d in res:
+        # src: 输入数据，此处对应波形
+        # trg：目标输出，此处对应坐标
+        print(d.src, d.trg)
+    print(type(d.src), d.src.shape[-1])
