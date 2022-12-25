@@ -26,12 +26,17 @@ class Batch:
     
 
 def greedy_decode(model, head, src, max_len, start_symbol):
+    model.eval()
     memory = model.transformer.encoder(model.embd(src))
     res = torch.ones(1, 1).fill_(start_symbol).type_as(src.data)
     for _ in range(max_len-1):
-        out = model.transformer.decoder(memory, model.embd(res), get_mask(src, head))
+        out = model.transformer.decoder(
+            model.embd(res),
+            memory, 
+            get_mask(res, head)
+            )
         nxt = model.proj(out)
-        print(nxt)
-        res = torch.cat([res, torch.ones(1, 1).type_as(src.data).fill_(nxt)], dim=1)
+        # print(nxt)
+        res = torch.cat([res, torch.ones(1, 1).type_as(src.data).fill_(nxt[:,-1].item())], dim=1)
     return res
 

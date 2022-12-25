@@ -3,18 +3,20 @@ from model import Net
 from torch import nn 
 from train_utils import *
 
-net = Net(10, 4)  # 获得模型
+net = Net(10, 6)  # 获得模型
 loss = nn.MSELoss()  # 损失函数
 optim = torch.optim.SGD(net.parameters(), lr=0.05)  # 随机梯度下降优化器
 
 def datagen(bsz, bnum):
     for _ in range(bsz):
         data = torch.randint(1, 10, (bnum, 10))
+        data[:, 0] = 1
         yield Batch(data, data, 2)
 
+net.train()
 for epoch in range(40):  # 训练20轮
     running_loss = 0.0
-    for d in datagen(8, 8):
+    for d in datagen(10, 8):
         x = d.src
         y = d.trg
         tgt = d.trg_float

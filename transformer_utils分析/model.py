@@ -11,7 +11,7 @@ class Net(nn.Module):
             nhead=2, 
             num_encoder_layers=2, 
             num_decoder_layers=2, 
-            dim_feedforward=16, 
+            dim_feedforward = 4 * dim, 
             batch_first=True
             )
         self.proj = nn.Linear(dim, 1)
